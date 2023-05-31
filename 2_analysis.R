@@ -1,3 +1,9 @@
+library(dplyr)
+library(Seurat)
+library(ggplot2)
+
+setwd("....")
+
 load("integration.RData")
 ######################################Dimention Reduction##############################################
 DefaultAssay(all.integrated) <- "integrated"
