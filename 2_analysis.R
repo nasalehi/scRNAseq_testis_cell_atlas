@@ -125,4 +125,59 @@ DimPlot(all.integrated, reduction = "umap", group.by = 'ident',label = TRUE, rep
   theme(panel.background = element_rect(fill = "white", colour = "black"))
 dev.off()
 
+######################################percent of datasets cells############################################## 
+counts <- readxl::read_excel("Results2/BarPlot3.xlsx")
+p1 <- as.matrix(counts[-1])
+colnames(p1)
+rownames(p1) <- counts$...1
+
+data_long <- melt(p1, id.vars = rownames(p1))
+
+pdf("./Results2/BarPlot5.pdf", width=10)
+ggplot(data_long,                  
+       aes(x = Var2,
+           y = value,
+           fill = Var1)) +
+  scale_fill_manual(values= c("Fetal"="lightpink1","Infancy"="darkseagreen","Childhood"="darkslategray4","Peri-puberty"="deepskyblue4", "Adulthood"="lightskyblue2")) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(guide = guide_axis(angle = 60)) +
+  theme( axis.text.x=element_text(size=12, face = "italic")) +
+  NULL
+dev.off()
+######################################DEGs##############################################
+DefaultAssay(all.integrated) <- "RNA"
+Idents(all.integrated) <- class 
+all.markers <- FindAllMarkers(all.integrated, only.pos = FALSE, min.pct = 0.25, logfc.threshold = 0.5)
+write.csv(all.markers, file= "./Results/DEG_all_integrated.csv")
+
+data_1 <- readxl::read_excel("./Results/DEGs/summary.xlsx")
+pdf("./Results2/DEGs/DEG_numbers.pdf", width=10)
+positions <- c("Sertoli-1", "Sertoli-2", "Sertoli-3", "leydig", "Myoid-1", "Myoid-2", "Macrophage", "Endothelial")
+  data_1 %>%
+  ggplot(aes(x = Cell_Types, y = DEG_No, fill = DEG))+ scale_x_discrete(limits = positions) +
+  geom_bar(stat = "identity")+ 
+  theme(text = element_text(size=20))+
+  coord_flip()
+dev.off()
+
+####Enrichment
+DEGsData <- data.frame(readxl::read_excel("Results/DEGs/enrichment.xlsx"))
+DEGsData$BP <- factor(DEGsData$BP,                                   
+                  levels = c("aerobic respiration", "ATP synthesis coupled electron transport","cellular response to steroid hormone stimulus","male gonad development",
+                    "very-low-density lipoprotein particle clearance", "positive regulation of cholesterol esterification", "phospholipid efflux",
+                    "cellular respiration", "mitochondrial electron transport, cytochrome c to oxygen", "mitochondrial ATP synthesis",
+                    "elastic fiber assembly", "extracellular matrix organization", "response to estradiol",
+                    "platelet aggregation", "angiogenesis1", "muscle contraction", 
+                    "detoxification of copper ion", "negative regulation of growth", "cellular oxidant detoxification", 
+                    "immune response","inflammatory response", "antigen processing and presentation",
+                   "angiogenesis", "positive regulation of gene expression", "response to hypoxia"))
+
+pdf("./Results2/DEGs/Enrich.pdf",width=9)
+ggp <- ggplot(DEGsData, aes(BP, P)) + 
+  geom_bar(stat = "identity")+                                      
+  coord_flip() + theme(text = element_text(size=15))+
+  xlim(rev(as.character(DEGsData$BP)))
+ggp  
+dev.off()
+
 save.image(file = "analysis.RData")
