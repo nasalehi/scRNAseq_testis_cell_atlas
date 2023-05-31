@@ -6,7 +6,7 @@ library(Seurat)
 setwd(".....")
 
 #################################Fetal#####################################
-#GSE86146
+###GSE86146
 filelist <- list.files(path= "Data/GSE86146_RAW/", recursive = TRUE,  pattern = "\\.txt$",full.names = TRUE)
 data <- lapply(filelist, read.delim)
 dataf[, c(1, 2, 3)]
@@ -27,7 +27,7 @@ pdf("./Results/quality1_vlnplot_F.pdf", width=20)
 lapply(c(fetal),VlnPlot, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
 dev.off() 
 #################################Infancy#####################################   
-#GSE124263           
+###GSE124263           
 p3.data <- Read10X(data.dir = "Data/GSE124263/Day2/")
 dim(p3.data)
 #32738  3634
@@ -141,5 +141,63 @@ pdf("./Results/quality2_vlnplot_y3.pdf", width=20)
 lapply(c(y13,y14),VlnPlot, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
 dev.off()
 
+#################################Spermatogenesis#####################################  
+###GSE109037
+Spermatogenesis1.data <- Read10X(data.dir = "Data/GSE109037/AdultHumanSpermatogenesis-reps1-3")
+dim(Spermatogenesis1.data)
+#33694  7134
+Spermatogenesis1 <- CreateSeuratObject(counts = Spermatogenesis1.data , project = "Spermatogenesis1", min.cells = 3, min.features = 200)
+dim(Spermatogenesis1)
+#29119  7132
+remove(Spermatogenesis1.data)
+Spermatogenesis1[["percent.mt"]] <- PercentageFeatureSet(Spermatogenesis1, pattern = "^MT-")
+###GSE106487
+Spermatogenesis2.data <- read.delim("Data/GSE106487/C1.txt")
+dim(Spermatogenesis2.data)
+#24153  3059
+Spermatogenesis2<- CreateSeuratObject(counts = Spermatogenesis2.data , project = "Spermatogenesis2", min.cells = 3, min.features = 200)
+dim(Spermatogenesis2)
+#22911  3046
+remove(Spermatogenesis2.data)
+Spermatogenesis2[["percent.mt"]] <- PercentageFeatureSet(Spermatogenesis2, pattern = "^MT-")
+
+pdf("./Results/quality1_vlnplot_s.pdf", width=20)
+lapply(c(Spermatogenesis1,Spermatogenesis2),VlnPlot, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+dev.off()
+
+Spermatogenesis1 <- subset(Spermatogenesis1, subset = nFeature_RNA > 1000 & nFeature_RNA < 10000 & percent.mt < 25)
+dim(Spermatogenesis1)
+#29119  7037
+Spermatogenesis2 <- subset(Spermatogenesis2, subset = nFeature_RNA > 800 & nFeature_RNA < 12000)
+dim(Spermatogenesis2)
+#22911  2971
+
+pdf("./Results/quality2_vlnplot_s.pdf", width=20)
+lapply(c(Spermatogenesis1,Spermatogenesis2),VlnPlot, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+dev.off()
+              
+save.image(file = "AllData.RData")
+#################################Normalization#####################################
+load("AllData.RData")        
+all.list <- c(fetal,D2,D7, y1, y7,y11,y13,y14,Spermatogenesis1, Spermatogenesis2)
+names(all.list) <- c("fetal","D2","D7", "y1", "y7","y11","y13","y14","Spermatogenesis1", "Spermatogenesis2")
+for (i in names(all.list)) {
+  all.list[[i]] <- NormalizeData(all.list[[i]], normalization.method = "LogNormalize", scale.factor = 10000)
+}
+
+#################################Variable#####################################
+for (i in names(all.list)) {
+  all.list[[i]] <- FindVariableFeatures(all.list[[i]], selection.method = "vst", nfeatures = 2000)
+}
+#################################removing#####################################
+lapply( c(fetal,D2,D7, y1, y7,y11,y13,y14,Spermatogenesis1, Spermatogenesis2),remove)
+#################################INTEGRATION#####################################              
+k.filter <- min(sapply(all.list, ncol)) + 1
+all.anchors <- FindIntegrationAnchors(object.list=all.list,dims = 1:35, k.filter = k.filter)
+remove(all.list)
+all.integrated <- IntegrateData(anchorset = all.anchors, dims = 1:35, k.weight=10)
+dim(all.integrated )
+#2000 26642
+remove(all.anchors)
 save.image(file = "integration.RData")
-######################################
+
