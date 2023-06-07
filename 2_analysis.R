@@ -166,7 +166,7 @@ positions <- c("Sertoli-1", "Sertoli-2", "Sertoli-3", "leydig", "Myoid-1", "Myoi
   coord_flip()
 dev.off()
 
-####Enrichment
+####Enrichment Plot
 DEGsData <- data.frame(readxl::read_excel("Results/DEGs/enrichment.xlsx"))
 DEGsData$BP <- factor(DEGsData$BP,                                   
                   levels = c("aerobic respiration", "ATP synthesis coupled electron transport","cellular response to steroid hormone stimulus","male gonad development",
