@@ -132,14 +132,14 @@ DimPlot(all.integrated, reduction = "umap", group.by = 'ident',label = TRUE, rep
 dev.off()
 
 ######################################percent of datasets cells############################################## 
-counts <- readxl::read_excel("Results2/BarPlot3.xlsx")
+counts <- readxl::read_excel("Results2/BarPlot.xlsx")
 p1 <- as.matrix(counts[-1])
 colnames(p1)
 rownames(p1) <- counts$...1
 
 data_long <- melt(p1, id.vars = rownames(p1))
 
-pdf("./Results2/BarPlot5.pdf", width=10)
+pdf("./Results2/BarPlot.pdf", width=10)
 ggplot(data_long,                  
        aes(x = Var2,
            y = value,
