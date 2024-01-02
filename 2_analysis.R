@@ -186,4 +186,15 @@ ggp <- ggplot(DEGsData, aes(BP, P)) +
 ggp  
 dev.off()
 
+data_1 <- readxl::read_excel("./Results2/DEGs/DEGSummary.xlsx")
+pdf("./Results2/DEGs/DEG_No.pdf", width=10)
+positions <- c("Sertoli-1", "Sertoli-2", "Sertoli-3", "leydig", "Myoid-1", "Myoid-2", "Macrophage", "Endothelial")
+               
+  data_1 %>%
+  ggplot(aes(x = Cell_Types, y = DEG_No, fill = DEG))+ scale_x_discrete(limits = positions) +
+  geom_bar(stat = "identity")+ 
+  theme(text = element_text(size=20))+
+  coord_flip()
+dev.off()
+
 save.image(file = "analysis.RData")
