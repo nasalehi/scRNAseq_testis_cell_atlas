@@ -1,2 +1,2 @@
 # scRNAseq_testis_cell_atlas
-Supplementary workflow details for the manuscript of "The construction of a testis transcriptional cell atlas from embryo to adult reveals various somatic cells and their molecular roles"
+Supplementary workflow details for the manuscript of "N. Salehi, M. Totonchi, "The construction of a testis transcriptional cell atlas from embryo to adult reveals various somatic cells and their molecular roles", Journal of Translational Medicine, 2023." If you make use of this work, please cite our paper available on https://link.springer.com/article/10.1186/s12967-023-04722-2
